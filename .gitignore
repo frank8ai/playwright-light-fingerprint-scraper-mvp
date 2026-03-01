@@ -15,9 +15,13 @@ logs/batch_summary_*.json
 data/raw/**/*.json
 data/clean/**/*.json
 data/snapshots/**/*.png
+data/cache/**/*.json
+data/runtime/**/*.json
 !data/raw/.gitkeep
 !data/clean/.gitkeep
 !data/snapshots/.gitkeep
+!data/cache/.gitkeep
+!data/runtime/.gitkeep
 
 # Playwright profiles and cache
 data/profiles/

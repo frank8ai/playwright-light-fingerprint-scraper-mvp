@@ -1,0 +1,27 @@
+{
+  "requestId": "7f6f8d66-1111-4c33-9999-9f2b9d3c1111",
+  "status": "success",
+  "backendUsed": "B",
+  "fallbackCount": 1,
+  "query": "package script sanity",
+  "fromCache": false,
+  "results": [
+    {
+      "title": "Example Domain",
+      "url": "https://example.com/",
+      "snippet": "This domain is for use in documentation examples.",
+      "source": "example.com",
+      "capturedAt": "2026-03-01T13:36:53.483Z",
+      "confidence": 0.7
+    }
+  ],
+  "metrics": {
+    "latencyMs": 3423,
+    "attempts": 1
+  },
+  "error": {
+    "code": "",
+    "message": "",
+    "type": "unknown"
+  }
+}

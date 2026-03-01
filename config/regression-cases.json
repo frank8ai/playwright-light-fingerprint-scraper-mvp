@@ -1,0 +1,22 @@
+[
+  { "id": "q01", "taskType": "query_search", "query": "open source observability stack" },
+  { "id": "q02", "taskType": "query_search", "query": "playwright persistent context best practices" },
+  { "id": "q03", "taskType": "query_search", "query": "nodejs circuit breaker pattern" },
+  { "id": "q04", "taskType": "query_search", "query": "retry with exponential backoff javascript" },
+  { "id": "q05", "taskType": "query_search", "query": "cache ttl strategy for scraper" },
+  { "id": "q06", "taskType": "query_search", "query": "health check endpoint design" },
+  { "id": "q07", "taskType": "query_search", "query": "json schema normalization pipeline" },
+  { "id": "q08", "taskType": "query_search", "query": "playwright timeout tuning guide" },
+  { "id": "q09", "taskType": "query_search", "query": "fallback backend orchestration" },
+  { "id": "q10", "taskType": "query_search", "query": "minimal metrics for scraping systems" },
+  { "id": "u11", "taskType": "url_snapshot", "url": "https://example.com" },
+  { "id": "u12", "taskType": "url_snapshot", "url": "https://www.iana.org/domains/example" },
+  { "id": "u13", "taskType": "url_snapshot", "url": "https://httpbin.org/html" },
+  { "id": "u14", "taskType": "url_snapshot", "url": "https://www.rfc-editor.org" },
+  { "id": "u15", "taskType": "url_snapshot", "url": "https://www.wikipedia.org" },
+  { "id": "u16", "taskType": "url_snapshot", "url": "https://developer.mozilla.org" },
+  { "id": "u17", "taskType": "url_snapshot", "url": "https://nodejs.org/en" },
+  { "id": "u18", "taskType": "url_snapshot", "url": "https://www.w3.org" },
+  { "id": "u19", "taskType": "url_snapshot", "url": "https://news.ycombinator.com" },
+  { "id": "u20", "taskType": "url_snapshot", "url": "https://www.gnu.org" }
+]

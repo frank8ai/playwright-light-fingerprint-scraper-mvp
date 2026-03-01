@@ -1,0 +1,35 @@
+{
+  "routing": {
+    "order": ["A", "B", "C"],
+    "maxAttempts": 3,
+    "backoffMs": [1000, 2000, 4000],
+    "legacyDirectEnabled": true,
+    "circuitBreaker": {
+      "failThreshold": 3,
+      "cooldownSec": 600,
+      "halfOpenSuccessThreshold": 1
+    }
+  },
+  "timeouts": {
+    "pageLoadMs": 15000,
+    "actionMs": 8000,
+    "totalMs": 35000
+  },
+  "cache": {
+    "enabled": true,
+    "queryTtlSec": 1200,
+    "urlTtlSec": 900
+  },
+  "rateLimit": {
+    "minIntervalMs": 1200,
+    "jitterMs": 500
+  },
+  "safety": {
+    "allowLoginAutomation": false
+  },
+  "paths": {
+    "runtimeDir": "data/runtime",
+    "cacheDir": "data/cache",
+    "metricsDir": "logs"
+  }
+}
