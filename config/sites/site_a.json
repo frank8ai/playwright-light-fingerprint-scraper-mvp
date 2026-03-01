@@ -1,0 +1,23 @@
+{
+  "site": "site_a",
+  "start_urls": [
+    "https://example.com"
+  ],
+  "navigation": {
+    "wait_until": "domcontentloaded",
+    "timeout_ms": 30000
+  },
+  "wait_rules": {
+    "selector": "body"
+  },
+  "selectors": {
+    "title": ["h1", "title"],
+    "body": ["article", "main", "body"],
+    "time": ["time[datetime]", "meta[property='article:published_time']", "meta[name='pubdate']"]
+  },
+  "extract_fields": ["title", "body", "published_at", "link"],
+  "pacing": {
+    "min_ms": 300,
+    "max_ms": 1200
+  }
+}

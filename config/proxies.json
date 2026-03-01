@@ -1,0 +1,22 @@
+[
+  {
+    "proxy_id": "proxy_001",
+    "server": "http://127.0.0.1:7890",
+    "username": "",
+    "password": "",
+    "region": "local",
+    "health_score": 100,
+    "cooldown_until": null,
+    "enabled": false
+  },
+  {
+    "proxy_id": "proxy_002",
+    "server": "http://127.0.0.1:7891",
+    "username": "",
+    "password": "",
+    "region": "local-b",
+    "health_score": 100,
+    "cooldown_until": null,
+    "enabled": false
+  }
+]

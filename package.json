@@ -1,0 +1,25 @@
+{
+  "name": "playwright-light-fingerprint-scraper",
+  "version": "0.1.0",
+  "description": "Single-site scraper MVP with Playwright persistent context, fingerprint suite, and proxy/retry controls",
+  "main": "scripts/scraper/run_once.js",
+  "scripts": {
+    "setup": "npm ci && npx playwright install chromium",
+    "scrape:once": "node scripts/scraper/run_once.js --site site_a",
+    "scrape:batch": "node scripts/scraper/run_batch.js --site site_a",
+    "phase:1": "ENABLE_FINGERPRINT=false USE_STEALTH=false node scripts/scraper/run_once.js --site site_a",
+    "phase:2": "ENABLE_FINGERPRINT=true USE_STEALTH=false node scripts/scraper/run_once.js --site site_a",
+    "phase:3": "ENABLE_FINGERPRINT=true USE_STEALTH=false node scripts/scraper/run_batch.js --site site_a"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "@apify/fingerprint-generator": "npm:fingerprint-generator@2.1.81",
+    "@apify/fingerprint-injector": "npm:fingerprint-injector@2.1.81",
+    "dotenv": "16.4.5",
+    "playwright": "1.51.0",
+    "playwright-extra": "4.3.6",
+    "puppeteer-extra-plugin-stealth": "2.11.2"
+  }
+}

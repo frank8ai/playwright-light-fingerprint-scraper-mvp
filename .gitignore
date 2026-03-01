@@ -1,0 +1,27 @@
+# Node
+node_modules/
+npm-debug.log*
+
+# Env
+.env
+.env.local
+
+# Runtime outputs
+logs/*.jsonl
+logs/*.log
+logs/batch_summary_*.json
+!logs/.gitkeep
+
+data/raw/**/*.json
+data/clean/**/*.json
+data/snapshots/**/*.png
+!data/raw/.gitkeep
+!data/clean/.gitkeep
+!data/snapshots/.gitkeep
+
+# Playwright profiles and cache
+data/profiles/
+playwright/.cache/
+
+# OS
+.DS_Store

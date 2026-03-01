@@ -1,0 +1,23 @@
+[
+  {
+    "account_id": "acct_001",
+    "profile_dir": "data/profiles/acct_001",
+    "proxy_id": null,
+    "enabled": true,
+    "proxy_mode": "failover"
+  },
+  {
+    "account_id": "acct_002",
+    "profile_dir": "data/profiles/acct_002",
+    "proxy_id": "proxy_002",
+    "enabled": false,
+    "proxy_mode": "fixed"
+  },
+  {
+    "account_id": "acct_003",
+    "profile_dir": "data/profiles/acct_003",
+    "proxy_id": null,
+    "enabled": true,
+    "proxy_mode": "failover"
+  }
+]
