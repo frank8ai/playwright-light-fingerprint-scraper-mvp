@@ -4,6 +4,11 @@
     "maxAttempts": 3,
     "backoffMs": [1000, 2000, 4000],
     "legacyDirectEnabled": true,
+    "preRoute": {
+      "enabled": true,
+      "questionFirstToC": true,
+      "questionMarkers": ["?", "？", "what", "how", "why", "when", "where", "which", "谁", "什么", "怎么", "如何", "为何", "为什么", "吗"]
+    },
     "circuitBreaker": {
       "failThreshold": 3,
       "cooldownSec": 600,
@@ -23,6 +28,16 @@
   "rateLimit": {
     "minIntervalMs": 1200,
     "jitterMs": 500
+  },
+  "output": {
+    "mode": "compact",
+    "compactTopN": 3,
+    "maxSnippetChars": 180,
+    "artifactPointer": {
+      "enabled": true,
+      "dir": "data/runtime/artifacts",
+      "summaryMaxChars": 280
+    }
   },
   "safety": {
     "allowLoginAutomation": false

@@ -64,6 +64,11 @@ async function main() {
     url: args.url,
     site: args.site || 'site_a',
     accountId: args.account,
+    outputMode: args.outputMode,
+    topN: args.topN ? Number(args.topN) : undefined,
+    maxSnippetChars: args.maxSnippetChars ? Number(args.maxSnippetChars) : undefined,
+    preferBrowser: toBoolean(args.preferBrowser, false),
+    artifactPointer: args.artifactPointer === undefined ? undefined : toBoolean(args.artifactPointer, true),
     requestId: args.requestId,
     debug: {
       forceBackendAFail: toBoolean(args.forceBackendAFail || process.env.SELF_USE_FORCE_BACKEND_A_FAIL, false),

@@ -15,6 +15,9 @@ function loadSelfUseConfig(configPath = DEFAULT_PATH) {
 
   const routing = config.routing || {};
   const circuitBreaker = routing.circuitBreaker || {};
+  const preRoute = routing.preRoute || {};
+  const output = config.output || {};
+  const artifactPointer = output.artifactPointer || {};
   const paths = config.paths || {};
 
   return {
@@ -23,6 +26,13 @@ function loadSelfUseConfig(configPath = DEFAULT_PATH) {
       maxAttempts: Number(routing.maxAttempts || 3),
       backoffMs: Array.isArray(routing.backoffMs) ? routing.backoffMs : [1000, 2000, 4000],
       legacyDirectEnabled: routing.legacyDirectEnabled !== false,
+      preRoute: {
+        enabled: preRoute.enabled !== false,
+        questionFirstToC: preRoute.questionFirstToC !== false,
+        questionMarkers: Array.isArray(preRoute.questionMarkers) && preRoute.questionMarkers.length > 0
+          ? preRoute.questionMarkers.map((item) => String(item).toLowerCase())
+          : ['?', '？', 'what', 'how', 'why', 'when', 'where', 'which', '谁', '什么', '怎么', '如何', '为何', '为什么', '吗'],
+      },
       circuitBreaker: {
         failThreshold: Number(circuitBreaker.failThreshold || 3),
         cooldownSec: Number(circuitBreaker.cooldownSec || 600),
@@ -42,6 +52,16 @@ function loadSelfUseConfig(configPath = DEFAULT_PATH) {
     rateLimit: {
       minIntervalMs: Number(config.rateLimit && config.rateLimit.minIntervalMs ? config.rateLimit.minIntervalMs : 1200),
       jitterMs: Number(config.rateLimit && config.rateLimit.jitterMs ? config.rateLimit.jitterMs : 500),
+    },
+    output: {
+      mode: output.mode === 'full' ? 'full' : 'compact',
+      compactTopN: Number(output.compactTopN || 3),
+      maxSnippetChars: Number(output.maxSnippetChars || 180),
+      artifactPointer: {
+        enabled: artifactPointer.enabled !== false,
+        dir: path.resolve(artifactPointer.dir || 'data/runtime/artifacts'),
+        summaryMaxChars: Number(artifactPointer.summaryMaxChars || 280),
+      },
     },
     safety: {
       allowLoginAutomation: false,

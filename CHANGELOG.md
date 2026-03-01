@@ -1,5 +1,23 @@
 # CHANGELOG
 
+## v2.0.2 - 2026-03-01 - Token-Saving Quick Pack (OpenClaw-focused)
+
+- Compact output mode enabled by default:
+  - configurable inline result limit (`compactTopN`) and snippet cap (`maxSnippetChars`)
+  - normalized response now includes `outputMode` and `summary`
+- Artifact pointer return:
+  - full backend payload written to `data/runtime/artifacts/<requestId>.json`
+  - response includes `artifact.path/hash/resultCountFull/sizeBytes`
+- Query pre-routing:
+  - question-like query can route to backend C first (configurable markers)
+  - browser-first path can still be forced with `--preferBrowser true`
+- Observability updates:
+  - request logs now include `routeOrder`, `outputMode`, `hasArtifact`
+  - 24h report adds `compactModeRate` and `artifactPointerRate`
+- Cache/consistency fix:
+  - cache key now includes output/routing variant to prevent `--outputMode full` requests from accidentally reusing compact cache payload
+  - report rate denominator for compact/artifact metrics now uses field-aware requests for clearer trend reading during mixed-version windows
+
 ## v2.0.1 - 2026-03-01 - Browser Runtime Hardening (OpenClaw-focused)
 
 - Retry layering hardening:

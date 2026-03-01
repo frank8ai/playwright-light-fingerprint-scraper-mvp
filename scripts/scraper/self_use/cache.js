@@ -82,13 +82,15 @@ class SelfUseCache {
     const query = String(input.query || '').trim();
     const taskType = String(input.taskType || '').trim();
     const site = String(input.site || '').trim();
-    return `${taskType}::${site}::${query}`;
+    const cacheVariant = String(input.cacheVariant || '').trim();
+    return `${taskType}::${site}::${query}::${cacheVariant || 'default'}`;
   }
 
   buildUrlKey(input = {}) {
     const url = String(input.url || '').trim();
     const taskType = String(input.taskType || '').trim();
-    return `${taskType}::${url}`;
+    const cacheVariant = String(input.cacheVariant || '').trim();
+    return `${taskType}::${url}::${cacheVariant || 'default'}`;
   }
 
   getQuery(input) {

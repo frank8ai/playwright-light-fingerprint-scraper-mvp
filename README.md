@@ -9,6 +9,8 @@ This `v2.0` release focuses on continuous availability for personal/agent workfl
 - Domain-scoped circuit breaker (backend health isolated by target domain)
 - Retry with exponential backoff
 - Short-term cache (`query/url` TTL)
+- Compact output by default (`topN + short snippet`)
+- Artifact pointer return (`summary + artifact path/hash`)
 - Unified output schema across all backends
 - Structured metrics and 24h report command
 - Legacy direct path preserved
@@ -81,6 +83,8 @@ v2 self-use stable:
 ```bash
 npm run dev:scraper
 npm run scraper:test -- --query "openclaw monetization tools"
+npm run scraper:test -- --query "what is playwright" --outputMode compact
+npm run scraper:test -- --query "what is playwright" --preferBrowser false
 npm run scraper:health
 npm run scraper:health -- --scope example.com
 npm run scraper:report -- --hours 24
@@ -97,6 +101,13 @@ Retry behavior note:
 
 - In v2 hardening mode, retry is orchestrator-controlled.
 - Backend adapters A/B run internal `run_once` with `maxAttempts=1` to avoid retry multiplication.
+- Query pre-routing: question-like queries can be routed to backend C first to reduce browser startup cost.
+
+Output behavior note:
+
+- Default mode is `compact` for token savings.
+- Full backend result is written to an artifact file and returned as pointer metadata (`artifact.path/hash`).
+- If you need full inline response for debugging, run with `--outputMode full`.
 
 ## Unified Output Schema
 
@@ -128,6 +139,14 @@ All backends return one schema:
     "code": "",
     "message": "",
     "type": "timeout|blocked|dom_changed|captcha|network|unknown"
+  },
+  "outputMode": "compact|full",
+  "summary": "string",
+  "artifact": {
+    "path": "absolute/path/to/artifact.json",
+    "hash": "sha256",
+    "resultCountFull": 0,
+    "sizeBytes": 0
   }
 }
 ```

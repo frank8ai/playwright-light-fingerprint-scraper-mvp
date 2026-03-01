@@ -84,6 +84,10 @@ function build24hReport(options = {}) {
   const success = requests.filter((item) => item.status === 'success' || item.status === 'partial').length;
   const degraded = requests.filter((item) => Number(item.fallbackCount || 0) > 0).length;
   const cacheHits = requests.filter((item) => item.fromCache === true).length;
+  const outputAwareRequests = requests.filter((item) => item.outputMode === 'compact' || item.outputMode === 'full');
+  const artifactAwareRequests = requests.filter((item) => Object.prototype.hasOwnProperty.call(item, 'hasArtifact'));
+  const compactCount = requests.filter((item) => item.outputMode === 'compact').length;
+  const artifactCount = requests.filter((item) => item.hasArtifact === true).length;
   const latencies = requests
     .map((item) => Number(item.latencyMs || 0))
     .filter((item) => Number.isFinite(item) && item >= 0);
@@ -105,6 +109,8 @@ function build24hReport(options = {}) {
     successRate: total > 0 ? Number(((success / total) * 100).toFixed(2)) : 0,
     fallbackRate: total > 0 ? Number(((degraded / total) * 100).toFixed(2)) : 0,
     cacheHitRate: total > 0 ? Number(((cacheHits / total) * 100).toFixed(2)) : 0,
+    compactModeRate: outputAwareRequests.length > 0 ? Number(((compactCount / outputAwareRequests.length) * 100).toFixed(2)) : 0,
+    artifactPointerRate: artifactAwareRequests.length > 0 ? Number(((artifactCount / artifactAwareRequests.length) * 100).toFixed(2)) : 0,
     latencyMs: {
       p50: percentile(latencies, 50),
       p95: percentile(latencies, 95),

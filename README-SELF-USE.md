@@ -22,6 +22,9 @@ Built-in reliability controls:
 - Cache:
   - query cache TTL: `1200s`
   - url snapshot cache TTL: `900s`
+- Output:
+  - default `compact` mode (`topN=3`, short snippets)
+  - artifact pointer return (`artifact.path/hash`) for full result payload
 
 Safety hardline:
 
@@ -62,6 +65,10 @@ SCRAPER_LEGACY_DIRECT=true npm run scraper:test -- --taskType url_snapshot --url
 - Single task test:
   - `npm run scraper:test -- --query "your query"`
   - `npm run scraper:test -- --url "https://target.url" --taskType url_snapshot`
+  - force full inline output:
+    - `npm run scraper:test -- --query "your query" --outputMode full`
+  - prefer browser (disable query pre-route):
+    - `npm run scraper:test -- --query "your query" --preferBrowser true`
 - Health check:
   - `npm run scraper:health`
   - `npm run scraper:health -- --scope example.com`
@@ -102,9 +109,22 @@ All backends are normalized to one JSON schema:
     "code": "",
     "message": "",
     "type": "timeout|blocked|dom_changed|captcha|network|unknown"
+  },
+  "outputMode": "compact|full",
+  "summary": "string",
+  "artifact": {
+    "path": "absolute/path/to/artifact.json",
+    "hash": "sha256",
+    "resultCountFull": 0,
+    "sizeBytes": 0
   }
 }
 ```
+
+Compatibility note:
+
+- `outputMode` / `summary` / `artifact` are additive fields introduced in `v2.0.2`.
+- Core schema fields remain unchanged.
 
 ## 5. Config Reference
 
@@ -118,6 +138,9 @@ Config file: `config/self-use-scraper.json`
 - `routing.circuitBreaker.cooldownSec`: open-circuit cooldown window
 - `routing.circuitBreaker.halfOpenSuccessThreshold`: required half-open successes to close circuit
 - retry ownership: orchestrator controls retries; A/B adapters run internal `run_once` with `maxAttempts=1`
+- `routing.preRoute.enabled`: enable pre-routing policy for query tasks
+- `routing.preRoute.questionFirstToC`: route question-like query to C first
+- `routing.preRoute.questionMarkers`: markers used to detect question-like queries
 
 - `timeouts.pageLoadMs`: page navigation timeout target
 - `timeouts.actionMs`: selector/action timeout target
@@ -129,6 +152,13 @@ Config file: `config/self-use-scraper.json`
 
 - `rateLimit.minIntervalMs`: stable pacing lower bound
 - `rateLimit.jitterMs`: randomized jitter for retry pacing
+
+- `output.mode`: `compact|full` (`compact` recommended for OpenClaw token control)
+- `output.compactTopN`: max result count returned inline in compact mode
+- `output.maxSnippetChars`: per-item snippet cap in compact mode
+- `output.artifactPointer.enabled`: whether to return artifact pointer
+- `output.artifactPointer.dir`: artifact file directory
+- `output.artifactPointer.summaryMaxChars`: compact summary cap
 
 - `safety.allowLoginAutomation`: **must remain false**
 

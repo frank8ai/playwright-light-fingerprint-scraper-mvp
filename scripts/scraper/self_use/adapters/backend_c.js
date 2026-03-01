@@ -119,7 +119,7 @@ class BackendCAdapter {
 
     const task = async () => {
       if (input.query) {
-        return this.runQueryFallback(input, timeoutMs);
+        return this.runQueryFallback(input, timeoutMs, context);
       }
       if (input.url) {
         return this.runUrlFallback(input, timeoutMs);
@@ -133,8 +133,11 @@ class BackendCAdapter {
     return withTimeout(task(), timeoutMs, 'Backend C timeout');
   }
 
-  async runQueryFallback(input, timeoutMs) {
-    const limit = Number(input.limit || 5);
+  async runQueryFallback(input, timeoutMs, context = {}) {
+    const compactTopN = context.config && context.config.output
+      ? Number(context.config.output.compactTopN || 3)
+      : 3;
+    const limit = Number(input.limit || compactTopN || 3);
     const apiUrl = `https://api.duckduckgo.com/?q=${encodeURIComponent(String(input.query))}&format=json&no_html=1&skip_disambig=1`;
     const payload = await fetchJson(apiUrl, timeoutMs);
 

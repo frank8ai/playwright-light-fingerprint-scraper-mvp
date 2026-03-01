@@ -23,5 +23,13 @@
     "code": "",
     "message": "",
     "type": "unknown"
+  },
+  "outputMode": "compact",
+  "summary": "1. Example Domain | example.com | This domain is for use in documentation examples.",
+  "artifact": {
+    "path": "/Users/yizhi/playwright-light-fingerprint-scraper/data/runtime/artifacts/7f6f8d66-1111-4c33-9999-9f2b9d3c1111.json",
+    "hash": "6f5b589fbf7ed80a7c7cf8afec9e1504223180d166a6b6ec7bbf3c8a395f4ce4",
+    "resultCountFull": 1,
+    "sizeBytes": 940
   }
 }
