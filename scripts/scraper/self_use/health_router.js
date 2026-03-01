@@ -16,6 +16,14 @@ function defaultBackendState() {
   };
 }
 
+function createBackendStateMap() {
+  return {
+    A: defaultBackendState(),
+    B: defaultBackendState(),
+    C: defaultBackendState(),
+  };
+}
+
 class HealthRouter {
   constructor(options = {}) {
     this.failThreshold = Number(options.failThreshold || 3);
@@ -29,17 +37,20 @@ class HealthRouter {
     const loaded = loadJson(this.statePath, null);
     this.state = loaded || {
       updatedAt: new Date().toISOString(),
-      backends: {
-        A: defaultBackendState(),
-        B: defaultBackendState(),
-        C: defaultBackendState(),
-      },
+      backends: createBackendStateMap(),
+      scopes: {},
     };
 
-    BACKENDS.forEach((backend) => {
-      if (!this.state.backends[backend]) {
-        this.state.backends[backend] = defaultBackendState();
-      }
+    if (!this.state.backends || typeof this.state.backends !== 'object') {
+      this.state.backends = createBackendStateMap();
+    }
+    if (!this.state.scopes || typeof this.state.scopes !== 'object') {
+      this.state.scopes = {};
+    }
+
+    this._ensureBackendMap(this.state.backends);
+    Object.keys(this.state.scopes).forEach((scopeKey) => {
+      this._ensureBackendMap(this.state.scopes[scopeKey]);
     });
 
     this.save();
@@ -50,8 +61,46 @@ class HealthRouter {
     saveJson(this.statePath, this.state);
   }
 
-  _refreshCircuit(backend) {
-    const state = this.state.backends[backend] || defaultBackendState();
+  _ensureBackendMap(backendMap) {
+    BACKENDS.forEach((backend) => {
+      if (!backendMap[backend]) {
+        backendMap[backend] = defaultBackendState();
+      }
+    });
+  }
+
+  _scopeKey(meta = {}) {
+    const raw = String(meta.scope || 'global').trim().toLowerCase();
+    if (!raw) {
+      return 'global';
+    }
+    return raw.replace(/[^a-z0-9._:-]/g, '_').slice(0, 120);
+  }
+
+  _getScopeState(meta = {}) {
+    const scopeKey = this._scopeKey(meta);
+    if (scopeKey === 'global') {
+      this._ensureBackendMap(this.state.backends);
+      return {
+        scopeKey,
+        backends: this.state.backends,
+      };
+    }
+
+    if (!this.state.scopes[scopeKey]) {
+      this.state.scopes[scopeKey] = createBackendStateMap();
+    }
+    this._ensureBackendMap(this.state.scopes[scopeKey]);
+
+    return {
+      scopeKey,
+      backends: this.state.scopes[scopeKey],
+    };
+  }
+
+  _refreshCircuit(backend, meta = {}) {
+    const { scopeKey, backends } = this._getScopeState(meta);
+    const state = backends[backend] || defaultBackendState();
     if (state.circuitState !== 'open' || !state.openedAt) {
       return;
     }
@@ -71,13 +120,15 @@ class HealthRouter {
         this.metrics.logEvent({
           eventType: 'circuit_half_open',
           backend,
+          scope: scopeKey,
           score: state.score,
         });
       }
     }
   }
 
-  getRoutableBackends(customOrder) {
+  getRoutableBackends(customOrder, meta = {}) {
+    const { backends } = this._getScopeState(meta);
     const order = Array.isArray(customOrder) && customOrder.length > 0 ? customOrder : this.order;
     const routable = [];
 
@@ -86,8 +137,8 @@ class HealthRouter {
         return;
       }
 
-      this._refreshCircuit(backend);
-      const state = this.state.backends[backend];
+      this._refreshCircuit(backend, meta);
+      const state = backends[backend];
       if (state.circuitState === 'open') {
         return;
       }
@@ -102,8 +153,9 @@ class HealthRouter {
     return routable;
   }
 
-  markAttempt(backend) {
-    const state = this.state.backends[backend];
+  markAttempt(backend, meta = {}) {
+    const { backends } = this._getScopeState(meta);
+    const state = backends[backend];
     if (!state) {
       return;
     }
@@ -115,7 +167,8 @@ class HealthRouter {
   }
 
   recordSuccess(backend, meta = {}) {
-    const state = this.state.backends[backend];
+    const { scopeKey, backends } = this._getScopeState(meta);
+    const state = backends[backend];
     if (!state) {
       return;
     }
@@ -146,14 +199,16 @@ class HealthRouter {
       this.metrics.logEvent({
         eventType: 'backend_success',
         backend,
+        scope: scopeKey,
         score: state.score,
         latencyMs: Number(meta.latencyMs || 0),
       });
     }
   }
 
-  recordFailure(backend, errorType = 'unknown') {
-    const state = this.state.backends[backend];
+  recordFailure(backend, errorType = 'unknown', meta = {}) {
+    const { scopeKey, backends } = this._getScopeState(meta);
+    const state = backends[backend];
     if (!state) {
       return;
     }
@@ -190,6 +245,7 @@ class HealthRouter {
       this.metrics.logEvent({
         eventType: state.circuitState === 'open' ? 'circuit_open' : 'backend_failure',
         backend,
+        scope: scopeKey,
         score: state.score,
         errorType,
         consecutiveFailures: state.consecutiveFailures,
@@ -197,19 +253,33 @@ class HealthRouter {
     }
   }
 
-  snapshot() {
-    BACKENDS.forEach((backend) => this._refreshCircuit(backend));
+  snapshot(options = {}) {
+    const scopeKey = this._scopeKey(options);
+    BACKENDS.forEach((backend) => this._refreshCircuit(backend, { scope: scopeKey }));
+
+    const { backends } = this._getScopeState({ scope: scopeKey });
+    const scopes = {};
+
+    Object.keys(this.state.scopes).forEach((key) => {
+      BACKENDS.forEach((backend) => this._refreshCircuit(backend, { scope: key }));
+      scopes[key] = {
+        backends: this.state.scopes[key],
+        routable: this.getRoutableBackends(this.order, { scope: key }),
+      };
+    });
 
     return {
       updatedAt: this.state.updatedAt,
       order: this.order,
+      scope: scopeKey,
       circuitBreaker: {
         failThreshold: this.failThreshold,
         cooldownSec: this.cooldownSec,
         halfOpenSuccessThreshold: this.halfOpenSuccessThreshold,
       },
-      backends: this.state.backends,
-      routable: this.getRoutableBackends(this.order),
+      backends,
+      routable: this.getRoutableBackends(this.order, { scope: scopeKey }),
+      scopes,
     };
   }
 }

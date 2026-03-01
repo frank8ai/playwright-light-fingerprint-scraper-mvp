@@ -1,4 +1,5 @@
 const { runOnce } = require('../../run_once');
+const path = require('path');
 const { withTimeout } = require('../utils');
 const {
   resolveSiteConfig,
@@ -6,6 +7,42 @@ const {
   readRecordsFromRunOnce,
   mapRecordToNormalizedItem,
 } = require('./common');
+const { loadJson } = require('../utils');
+
+function pickBaseAccount(accountId) {
+  const accountsPath = path.resolve('config/accounts.json');
+  const accounts = loadJson(accountsPath, []);
+  const enabledAccounts = Array.isArray(accounts)
+    ? accounts.filter((item) => item && item.enabled !== false)
+    : [];
+
+  if (enabledAccounts.length === 0) {
+    const error = new Error('No enabled accounts in config/accounts.json');
+    error.code = 'NO_ENABLED_ACCOUNT_B';
+    throw error;
+  }
+
+  if (!accountId) {
+    return enabledAccounts[0];
+  }
+
+  const matched = enabledAccounts.find((item) => item.account_id === accountId);
+  if (!matched) {
+    const error = new Error(`Account not found or disabled for backend B: ${accountId}`);
+    error.code = 'ACCOUNT_NOT_FOUND_B';
+    throw error;
+  }
+  return matched;
+}
+
+function buildStableAccount(baseAccount) {
+  const profileRoot = baseAccount.profile_dir || `data/profiles/${baseAccount.account_id || 'default'}`;
+  return {
+    ...baseAccount,
+    account_id: `${baseAccount.account_id || 'default'}_stable`,
+    profile_dir: path.join(profileRoot, 'stable'),
+  };
+}
 
 class BackendBAdapter {
   constructor(options = {}) {
@@ -37,14 +74,18 @@ class BackendBAdapter {
     const siteConfig = resolveSiteConfig(siteKey);
     const stableSiteConfig = this.buildStableSiteConfig(siteConfig, context.config || {});
     const startUrl = resolveStartUrl(input, stableSiteConfig);
+    const baseAccount = pickBaseAccount(input.accountId);
+    const stableAccount = buildStableAccount(baseAccount);
 
     const runPromise = runOnce({
       siteKey,
       siteConfig: stableSiteConfig,
       startUrl,
+      account: stableAccount,
       enableFingerprint: false,
       useStealth: false,
       headless: true,
+      maxAttempts: 1,
     });
 
     const runResult = await withTimeout(

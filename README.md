@@ -6,6 +6,7 @@ This `v2.0` release focuses on continuous availability for personal/agent workfl
 
 - Multi-backend fallback (`A -> B -> C`)
 - Health routing with circuit breaker and half-open recovery
+- Domain-scoped circuit breaker (backend health isolated by target domain)
 - Retry with exponential backoff
 - Short-term cache (`query/url` TTL)
 - Unified output schema across all backends
@@ -81,6 +82,7 @@ v2 self-use stable:
 npm run dev:scraper
 npm run scraper:test -- --query "openclaw monetization tools"
 npm run scraper:health
+npm run scraper:health -- --scope example.com
 npm run scraper:report -- --hours 24
 npm run scraper:regression -- --simulateAFailPct 40
 ```
@@ -90,6 +92,11 @@ Legacy direct switch through new entry (rollback lane):
 ```bash
 SCRAPER_LEGACY_DIRECT=true npm run scraper:test -- --taskType url_snapshot --url "https://example.com"
 ```
+
+Retry behavior note:
+
+- In v2 hardening mode, retry is orchestrator-controlled.
+- Backend adapters A/B run internal `run_once` with `maxAttempts=1` to avoid retry multiplication.
 
 ## Unified Output Schema
 

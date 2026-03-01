@@ -1,5 +1,19 @@
 # CHANGELOG
 
+## v2.0.1 - 2026-03-01 - Browser Runtime Hardening (OpenClaw-focused)
+
+- Retry layering hardening:
+  - adapter A/B now call legacy `run_once` with `maxAttempts=1`
+  - retry/backoff remains orchestrator-owned to avoid retry multiplication
+- Backend isolation hardening:
+  - backend B now uses dedicated stable profile path (`<account profile>/stable`)
+- Error taxonomy improvements:
+  - added mapping for Playwright/browser/proxy/network failure patterns
+  - supports passthrough hints from legacy `errorType` (`permission/config` -> schema-safe types)
+- Circuit breaker hardening:
+  - health state is now domain-scoped (`backend + domain`) instead of backend-global only
+  - `scraper:health` supports `--scope <domain>` for targeted inspection
+
 ## v2.0.0 - 2026-03-01 - Self-Use Stable Edition
 
 ### Phase 1 - Architecture Skeleton + Contracts + Unified Interface

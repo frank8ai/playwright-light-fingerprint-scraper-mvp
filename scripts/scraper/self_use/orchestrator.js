@@ -1,11 +1,12 @@
 const { randomUUID } = require('crypto');
+const path = require('path');
 const { loadSelfUseConfig } = require('./config');
 const { normalizeError } = require('./errors');
 const { buildSuccessResult, buildFailedResult, toCachePayload, fromCachePayload } = require('./normalizer');
 const { SelfUseCache } = require('./cache');
 const { MetricsLogger } = require('./metrics');
 const { HealthRouter } = require('./health_router');
-const { sleep, randomJitter } = require('./utils');
+const { sleep, randomJitter, normalizeDomain, loadJson } = require('./utils');
 const { BackendAAdapter } = require('./adapters/backend_a');
 const { BackendBAdapter } = require('./adapters/backend_b');
 const { BackendCAdapter } = require('./adapters/backend_c');
@@ -55,6 +56,31 @@ class SelfUseOrchestrator {
     return String(input.query || input.url || '').trim();
   }
 
+  _resolveRouteScope(input = {}) {
+    if (input.scope) {
+      return String(input.scope).trim().toLowerCase();
+    }
+
+    const fromUrl = normalizeDomain(String(input.url || '').trim());
+    if (fromUrl) {
+      return fromUrl;
+    }
+
+    if (input.site) {
+      const sitePath = path.resolve(`config/sites/${input.site}.json`);
+      const siteConfig = loadJson(sitePath, null);
+      const firstStartUrl = siteConfig && Array.isArray(siteConfig.start_urls)
+        ? siteConfig.start_urls[0]
+        : '';
+      const fromSite = normalizeDomain(String(firstStartUrl || '').trim());
+      if (fromSite) {
+        return fromSite;
+      }
+    }
+
+    return 'global';
+  }
+
   _pickCache(input = {}) {
     if (!this.config.cache.enabled) {
       return null;
@@ -79,6 +105,7 @@ class SelfUseOrchestrator {
     const requestId = randomUUID();
     const taskType = this._resolveTaskType(input);
     const query = this._resolveQueryLabel(input);
+    const routeScope = this._resolveRouteScope(input);
     const maxAttempts = Number(this.config.routing.maxAttempts || 3);
     const backoffMs = Array.isArray(this.config.routing.backoffMs) ? this.config.routing.backoffMs : [1000, 2000, 4000];
 
@@ -90,6 +117,7 @@ class SelfUseOrchestrator {
         this.metrics.logRequest({
           requestId,
           taskType,
+          scope: routeScope,
           backendUsed: cachedResult.backendUsed,
           status: cachedResult.status,
           fromCache: true,
@@ -108,14 +136,14 @@ class SelfUseOrchestrator {
     let lastBackend = '';
 
     for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
-      const availableBackends = this.router.getRoutableBackends(this.config.routing.order);
+      const availableBackends = this.router.getRoutableBackends(this.config.routing.order, { scope: routeScope });
       const backend = availableBackends.find((item) => !attemptedBackends.includes(item)) || availableBackends[0];
 
       if (!backend || !this.adapters[backend]) {
         break;
       }
 
-      this.router.markAttempt(backend);
+      this.router.markAttempt(backend, { scope: routeScope });
       const adapter = this.adapters[backend];
       const attemptStart = Date.now();
       lastBackend = backend;
@@ -147,12 +175,14 @@ class SelfUseOrchestrator {
         });
 
         this.router.recordSuccess(backend, {
+          scope: routeScope,
           latencyMs: Date.now() - attemptStart,
         });
 
         this.metrics.logAttempt({
           requestId,
           taskType,
+          scope: routeScope,
           backend,
           attempt,
           latencyMs: Date.now() - attemptStart,
@@ -164,6 +194,7 @@ class SelfUseOrchestrator {
         this.metrics.logRequest({
           requestId,
           taskType,
+          scope: routeScope,
           backendUsed: backend,
           status: result.status,
           fromCache: false,
@@ -184,11 +215,14 @@ class SelfUseOrchestrator {
         lastError = normalizedError;
         attemptedBackends.push(backend);
 
-        this.router.recordFailure(backend, normalizedError.type);
+        this.router.recordFailure(backend, normalizedError.type, {
+          scope: routeScope,
+        });
 
         this.metrics.logAttempt({
           requestId,
           taskType,
+          scope: routeScope,
           backend,
           attempt,
           latencyMs: Date.now() - attemptStart,
@@ -220,6 +254,7 @@ class SelfUseOrchestrator {
     this.metrics.logRequest({
       requestId,
       taskType,
+      scope: routeScope,
       backendUsed: failedResult.backendUsed,
       status: failedResult.status,
       fromCache: false,
@@ -233,8 +268,8 @@ class SelfUseOrchestrator {
     return failedResult;
   }
 
-  healthSnapshot() {
-    return this.router.snapshot();
+  healthSnapshot(options = {}) {
+    return this.router.snapshot(options);
   }
 }
 

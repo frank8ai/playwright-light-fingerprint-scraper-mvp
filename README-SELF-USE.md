@@ -18,6 +18,7 @@ Built-in reliability controls:
   - fail threshold: `3`
   - cooldown: `600s`
   - half-open probe with success recovery
+  - isolated per target domain (scope) to avoid cross-site blast radius
 - Cache:
   - query cache TTL: `1200s`
   - url snapshot cache TTL: `900s`
@@ -63,6 +64,7 @@ SCRAPER_LEGACY_DIRECT=true npm run scraper:test -- --taskType url_snapshot --url
   - `npm run scraper:test -- --url "https://target.url" --taskType url_snapshot`
 - Health check:
   - `npm run scraper:health`
+  - `npm run scraper:health -- --scope example.com`
 - 24h report:
   - `npm run scraper:report -- --hours 24`
 - Regression:
@@ -115,6 +117,7 @@ Config file: `config/self-use-scraper.json`
 - `routing.circuitBreaker.failThreshold`: consecutive failures before open circuit
 - `routing.circuitBreaker.cooldownSec`: open-circuit cooldown window
 - `routing.circuitBreaker.halfOpenSuccessThreshold`: required half-open successes to close circuit
+- retry ownership: orchestrator controls retries; A/B adapters run internal `run_once` with `maxAttempts=1`
 
 - `timeouts.pageLoadMs`: page navigation timeout target
 - `timeouts.actionMs`: selector/action timeout target

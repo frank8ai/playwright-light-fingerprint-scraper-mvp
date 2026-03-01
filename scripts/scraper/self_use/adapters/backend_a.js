@@ -31,6 +31,7 @@ class BackendAAdapter {
       enableFingerprint: true,
       useStealth: false,
       headless: true,
+      maxAttempts: 1,
     });
 
     const runResult = await withTimeout(

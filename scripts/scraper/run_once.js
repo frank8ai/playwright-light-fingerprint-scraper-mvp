@@ -113,8 +113,8 @@ async function runOnce(options = {}) {
   const screenshotOnError = toBoolean(process.env.SCREENSHOT_ON_ERROR, true);
 
   const runStartedAt = Date.now();
-  const backoffBase = Number(process.env.RETRY_BACKOFF_MS || 1000);
-  const maxAttempts = Number(process.env.MAX_ATTEMPTS || process.env.MAX_RETRIES || 3);
+  const backoffBase = Number(options.backoffBaseMs ?? process.env.RETRY_BACKOFF_MS ?? 1000);
+  const maxAttempts = Number(options.maxAttempts ?? process.env.MAX_ATTEMPTS ?? process.env.MAX_RETRIES ?? 3);
 
   const rawSiteDir = path.resolve('data/raw', siteKey);
   const cleanSiteDir = path.resolve('data/clean', siteKey);

@@ -9,7 +9,9 @@ async function main() {
   const args = parseArgs(process.argv.slice(2));
   const config = loadSelfUseConfig(args.config || path.resolve('config/self-use-scraper.json'));
   const orchestrator = new SelfUseOrchestrator({ config });
-  const health = orchestrator.healthSnapshot();
+  const health = orchestrator.healthSnapshot({
+    scope: args.scope,
+  });
   process.stdout.write(`${JSON.stringify(health, null, 2)}\n`);
 }
 

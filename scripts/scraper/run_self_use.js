@@ -63,6 +63,7 @@ async function main() {
     query: args.query,
     url: args.url,
     site: args.site || 'site_a',
+    accountId: args.account,
     requestId: args.requestId,
     debug: {
       forceBackendAFail: toBoolean(args.forceBackendAFail || process.env.SELF_USE_FORCE_BACKEND_A_FAIL, false),
