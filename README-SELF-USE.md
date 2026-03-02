@@ -211,3 +211,9 @@ A: No. This build enforces `allowLoginAutomation=false`.
 - `CONCURRENCY_EXPECTED=TODO`
 - `FAILURE_LOG_PATH=logs/error.jsonl`
 - `OUTPUT_EXAMPLE_PATH=docs/output-example.json`
+
+## 9. OpenClaw Handoff
+
+If you need a ready-to-forward integration note for OpenClaw, use:
+
+- `OPENCLAW-INTEGRATION.md`

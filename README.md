@@ -154,6 +154,7 @@ All backends return one schema:
 ## Docs
 
 - Self-use setup and config details: `README-SELF-USE.md`
+- OpenClaw quick integration handoff: `OPENCLAW-INTEGRATION.md`
 - Operations and failure SOP: `RUNBOOK.md`
 - Release history and rollback notes: `CHANGELOG.md`
 - Example output payload: `docs/output-example.json`

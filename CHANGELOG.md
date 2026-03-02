@@ -1,5 +1,15 @@
 # CHANGELOG
 
+## v2.0.3 - 2026-03-01 - OpenClaw Integration Docs
+
+- Added `OPENCLAW-INTEGRATION.md`:
+  - one-page handoff for OpenClaw tool wiring
+  - command contract, output field contract, and token-saving usage pattern
+  - safety hardline reminders
+- Updated docs index:
+  - `README.md` now links `OPENCLAW-INTEGRATION.md`
+  - `README-SELF-USE.md` adds OpenClaw handoff pointer
+
 ## v2.0.2 - 2026-03-01 - Token-Saving Quick Pack (OpenClaw-focused)
 
 - Compact output mode enabled by default:
